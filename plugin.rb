@@ -46,8 +46,10 @@ if request_method == 'post'
 
         settings.compress_request = false
         settings.passive = false
-        settings.issuer = Discourse.base_url
-        settings.assertion_consumer_service_url = Discourse.base_url + "/auth/saml/callback"
+        # settings.issuer = Discourse.base_url
+        settings.issuer = "https://community.translatorswb.org"
+        # settings.assertion_consumer_service_url = Discourse.base_url + "/auth/saml/callback"
+        settings.assertion_consumer_service_url = "https://community.translatorswb.org/auth/saml/callback"
         settings.name_identifier_format = GlobalSetting.try(:saml_name_identifier_format) || "urn:oasis:names:tc:SAML:2.0:protocol"
 
         saml_params = authn_request.create_params(settings, {})
