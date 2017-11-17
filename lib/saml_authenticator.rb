@@ -95,7 +95,8 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
   end
 
   def log(info)
-    Rails.logger.warn("SAML Debugging: #{info}") if GlobalSetting.try(:saml_debug_auth)
+    #Rails.logger.warn("SAML Debugging: #{info}") if GlobalSetting.try(:saml_debug_auth)
+    Rails.logger.warn("SAML Debugging: #{info}")
   end
 
   def after_create_account(user, auth)
