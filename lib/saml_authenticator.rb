@@ -57,6 +57,13 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
     end
 
     result.user ||= User.find_by_email(result.email)
+    log("uid: #{uid}")
+    email_from_auth = auth[:email]
+    log("email_from_auth: #{email_from_auth}")
+    log("saml_auth_info: #{auth[:info].inspect}")
+    log("saml_auth_extra: #{auth.extra.inspect}")
+    log("result: #{result.inspect}")
+    log("saml_user_info: #{saml_user_info.inspect}")
 
     if saml_user_info.nil? && result.user
       ::PluginStore.set("saml", "saml_user_#{uid}", {user_id: result.user.id })
