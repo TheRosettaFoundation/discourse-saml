@@ -33,22 +33,24 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
       log("saml_auth_extra: #{auth.extra.inspect}")
     end
 
-    uid = auth[:uid]
-    result.name = auth[:info].name || uid
-    result.username = uid
-    if auth.extra.present? && auth.extra[:raw_info].present?
-      result.username = auth.extra[:raw_info].attributes['screenName'].try(:first) || uid
-    end
+    # user_id from trommons.org
+    uid = "trommons_#{auth.extra[:raw_info].attributes['urn:oid:0.9.2342.19200300.100.1.1']}"
 
-    if GlobalSetting.try(:saml_use_uid) && auth.extra.present? && auth.extra[:raw_info].present?
-      result.username = auth.extra[:raw_info].attributes['uid'].try(:first) || uid
-    end
-
-    result.email = auth[:info].email || uid
+    # email from trommons.org
+    result.email = auth.extra[:raw_info].attributes['urn:oid:1.2.840.113549.1.9.1']
     result.email_valid = true
-
     if result.respond_to?(:skip_email_validation) && GlobalSetting.try(:saml_skip_email_validation)
       result.skip_email_validation = true
+    end
+
+    # displayName from trommons.org
+    result.username = auth.extra[:raw_info].attributes['urn:oid:2.16.840.1.113730.3.1.241']
+
+    # givenName, sn (firstName, lastName) from Trommons
+    if auth.extra[:raw_info].attributes['urn:oid:2.5.4.42'].present? && auth.extra[:raw_info].attributes['urn:oid:2.5.4.4'].present?
+      result.name = "#{auth.extra[:raw_info].attributes['urn:oid:2.5.4.42']} #{auth.extra[:raw_info].attributes['urn:oid:2.5.4.4']}"
+    else
+      result.name = result.username
     end
 
     saml_user_info = ::PluginStore.get("saml", "saml_user_#{uid}")
@@ -57,13 +59,6 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
     end
 
     result.user ||= User.find_by_email(result.email)
-    log("uid: #{uid}")
-    email_from_auth = auth[:email]
-    log("email_from_auth: #{email_from_auth}")
-    log("saml_auth_info: #{auth[:info].inspect}")
-    log("saml_auth_extra: #{auth.extra.inspect}")
-    log("result: #{result.inspect}")
-    log("saml_user_info: #{saml_user_info.inspect}")
 
     if saml_user_info.nil? && result.user
       ::PluginStore.set("saml", "saml_user_#{uid}", {user_id: result.user.id })
@@ -90,6 +85,10 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
     end
 
     sync_email(result.user, Email.downcase(result.email)) if GlobalSetting.try(:saml_sync_email) && result.user.present? && result.user.email != Email.downcase(result.email)
+
+    log("saml_auth_extra: #{auth.extra.inspect}")
+    log("result: #{result.inspect}")
+    log("saml_user_info: #{saml_user_info.inspect}")
 
     result
   end
