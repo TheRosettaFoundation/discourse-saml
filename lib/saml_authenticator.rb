@@ -34,21 +34,21 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
     end
 
     # user_id from trommons.org
-    uid = "trommons_#{auth.extra[:raw_info].attributes['urn:oid:0.9.2342.19200300.100.1.1']}"
+    uid = "trommons_#{auth.extra[:raw_info].attributes['urn:oid:0.9.2342.19200300.100.1.1'].try(:first)}"
 
     # email from trommons.org
-    result.email = auth.extra[:raw_info].attributes['urn:oid:1.2.840.113549.1.9.1']
+    result.email = auth.extra[:raw_info].attributes['urn:oid:1.2.840.113549.1.9.1'].try(:first)
     result.email_valid = true
     if result.respond_to?(:skip_email_validation) && GlobalSetting.try(:saml_skip_email_validation)
       result.skip_email_validation = true
     end
 
     # displayName from trommons.org
-    result.username = auth.extra[:raw_info].attributes['urn:oid:2.16.840.1.113730.3.1.241']
+    result.username = auth.extra[:raw_info].attributes['urn:oid:2.16.840.1.113730.3.1.241'].try(:first)
 
     # givenName, sn (firstName, lastName) from Trommons
-    if auth.extra[:raw_info].attributes['urn:oid:2.5.4.42'].present? && auth.extra[:raw_info].attributes['urn:oid:2.5.4.4'].present?
-      result.name = "#{auth.extra[:raw_info].attributes['urn:oid:2.5.4.42']} #{auth.extra[:raw_info].attributes['urn:oid:2.5.4.4']}"
+    if auth.extra[:raw_info].attributes['urn:oid:2.5.4.42'].try(:first).present? && auth.extra[:raw_info].attributes['urn:oid:2.5.4.4'].try(:first).present?
+      result.name = "#{auth.extra[:raw_info].attributes['urn:oid:2.5.4.42'].try(:first)} #{auth.extra[:raw_info].attributes['urn:oid:2.5.4.4'].try(:first)}"
     else
       result.name = result.username
     end
