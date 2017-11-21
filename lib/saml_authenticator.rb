@@ -86,16 +86,16 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
 
     sync_email(result.user, Email.downcase(result.email)) if GlobalSetting.try(:saml_sync_email) && result.user.present? && result.user.email != Email.downcase(result.email)
 
-    log("saml_auth_extra: #{auth.extra.inspect}")
-    log("result: #{result.inspect}")
-    log("saml_user_info: #{saml_user_info.inspect}")
+    #log("saml_auth_extra: #{auth.extra.inspect}")
+    #log("result: #{result.inspect}")
+    #log("saml_user_info: #{saml_user_info.inspect}")
 
     result
   end
 
   def log(info)
-    #Rails.logger.warn("SAML Debugging: #{info}") if GlobalSetting.try(:saml_debug_auth)
-    Rails.logger.warn("SAML Debugging: #{info}")
+    Rails.logger.warn("SAML Debugging: #{info}") if GlobalSetting.try(:saml_debug_auth)
+    #Rails.logger.warn("SAML Debugging: #{info}")
   end
 
   def after_create_account(user, auth)
